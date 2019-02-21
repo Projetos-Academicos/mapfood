@@ -25,6 +25,10 @@ public class Cidade {
 
 	}
 
+	public Cidade(Long id){
+		setId(id);
+	}
+
 	public Cidade(String nome){
 		setNome(nome);
 	}

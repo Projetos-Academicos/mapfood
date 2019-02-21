@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -42,8 +41,7 @@ public class PopularBancoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 
-	public List<String> listaIdEstabelecimento = new ArrayList<String>();
-
+	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaClienteApartirDoClienteCSV() {
 
 		try {
@@ -81,24 +79,24 @@ public class PopularBancoService {
 				linhaArquivo = lerArquivo.nextLine();
 				String[] estabelecimentoAux = linhaArquivo.split(",");
 
-				listaIdEstabelecimento.add(estabelecimentoAux[0]);
 				Cidade cidade = cidadeRepository.findByNome(estabelecimentoAux[2]);
 				if(cidade == null) {
-					cidade = cidadeRepository.save(new Cidade(estabelecimentoAux[2]));
+					if(estabelecimentoAux[2] != null && !estabelecimentoAux[2].isEmpty()) {
+						cidade = cidadeRepository.save(new Cidade(estabelecimentoAux[2]));
+					}
 				}
 
-
-				Estabelecimento estabelecimento = new Estabelecimento(estabelecimentoAux[1], cidade, estabelecimentoAux[3], estabelecimentoAux[4], estabelecimentoAux[5]);
+				Estabelecimento estabelecimento = new Estabelecimento(estabelecimentoAux[1], cidade, estabelecimentoAux[3], estabelecimentoAux[4], estabelecimentoAux[5], estabelecimentoAux[0]);
 
 				estabelecimentoRepository.save(estabelecimento);
 			}
 			lerArquivo.close();
-			popularTabelaProdutoApartirDoProdutoCSV();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaMotoboyApartirDoMotoboyCSV() {
 
 		try {
@@ -131,42 +129,39 @@ public class PopularBancoService {
 			String linhaArquivo;
 			Scanner lerArquivo = new Scanner(produtoCSV);
 			lerArquivo.nextLine();
-			System.out.println(lerArquivo.hasNext());
-			lerArquivo.nextLine();
 
+			Integer totalProdutosBons = 0;
 			while (lerArquivo.hasNext()) {
 				linhaArquivo = lerArquivo.nextLine();
 				String[] produtoAux = linhaArquivo.split(",");
 
 				Random random = new Random();
-				Integer value = random.nextInt(listaIdEstabelecimento.size());
+
+				List<Estabelecimento> listaEstabelecimentos = estabelecimentoRepository.findAll();
+
+				Integer value = random.nextInt(listaEstabelecimentos.size());
 
 				Long idRandomico = value.longValue();
 				Cidade cidade = new Cidade();
 
 				Integer count = 0;
-				if(listaIdEstabelecimento.contains(produtoAux[2])) {
-					for (String est : listaIdEstabelecimento) {
-						count ++;
-						if(est.equals(produtoAux[2])) {
-							idRandomico = count.longValue();
-						}
+				for (Estabelecimento est : listaEstabelecimentos) {
+					count ++;
+					if(est.getHashId().equals(produtoAux[2])) {
+						idRandomico = count.longValue();
+						totalProdutosBons ++;
+					}
+					if(est.getCidade().getNome().equals(produtoAux[6])) {
+						cidade = est.getCidade();
 					}
 				}
 
-				List<Cidade> listaCidadesCadastradas = cidadeRepository.findAll();
-				for (Cidade cidadeAux : listaCidadesCadastradas) {
-					if(cidadeAux.getNome().equals(produtoAux[6])) {
-						cidade = cidadeAux;
-					}
-				}
+				Produto produto = new Produto(produtoAux[0], idRandomico.equals(0l) ? 1l : idRandomico, produtoAux[4], Double.parseDouble(produtoAux[5]), cidade);
 
-				Produto produto = new Produto(produtoAux[0], idRandomico, produtoAux[4], Double.parseDouble(produtoAux[5]), cidade);
-
-				//				List<Estabelecimento> t = estabelecimentoRepository.findAll();
 				produtoRepository.save(produto);
 
 			}
+			System.out.println("totalProdutos: " + totalProdutosBons);
 			lerArquivo.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

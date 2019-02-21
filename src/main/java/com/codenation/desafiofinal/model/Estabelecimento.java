@@ -35,6 +35,9 @@ public class Estabelecimento {
 	@JoinColumn(name = "cidade_id")
 	private Cidade cidade;
 
+	@Column(name = "hash_id")
+	private String hashId;
+
 	public Estabelecimento() {
 
 	}
@@ -43,11 +46,12 @@ public class Estabelecimento {
 		setId(id);
 	}
 
-	public Estabelecimento(String nome, Cidade cidade, String longitude, String latitude, String descricao) {
+	public Estabelecimento(String nome, Cidade cidade, String longitude, String latitude, String descricao, String hashId) {
 		setNome(nome);
 		setDescricao(descricao);
 		setCidade(cidade);
 		setLocalizacao(new Localizacao(longitude, latitude));
+		setHashId(hashId);
 	}
 
 	public Cidade getCidade() {
@@ -56,9 +60,13 @@ public class Estabelecimento {
 	public String getDescricao() {
 		return descricao;
 	}
+	public String getHashId() {
+		return hashId;
+	}
 	public Long getId() {
 		return id;
 	}
+
 	public Localizacao getLocalizacao() {
 		return localizacao;
 	}
@@ -73,6 +81,10 @@ public class Estabelecimento {
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
+	}
+
+	public void setHashId(String hashId) {
+		this.hashId = hashId;
 	}
 
 	public void setId(Long id) {
