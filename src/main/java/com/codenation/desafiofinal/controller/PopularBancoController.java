@@ -19,7 +19,7 @@ public class PopularBancoController {
 		popularBanco.popularTabelaClienteApartirDoClienteCSV();
 	}
 
-	@GetMapping("/estabelecimento_produto")
+	@GetMapping("/estabelecimento-produto")
 	public void popularTabelaEstabelecimento() {
 		popularBanco.popularTabelaEstabelecimentoApartirDoEstabelecimentoCSV();
 		popularBanco.popularTabelaProdutoApartirDoProdutoCSV();

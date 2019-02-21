@@ -29,6 +29,12 @@ public class Cidade {
 		setId(id);
 	}
 
+	public Cidade(Long id, String nome) {
+		super();
+		this.id = id;
+		this.nome = nome;
+	}
+
 	public Cidade(String nome){
 		setNome(nome);
 	}

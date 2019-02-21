@@ -46,6 +46,16 @@ public class Estabelecimento {
 		setId(id);
 	}
 
+	public Estabelecimento(Long id, Localizacao localizacao, String nome, String descricao, Cidade cidade,
+			String hashId) {
+		this.id = id;
+		this.localizacao = localizacao;
+		this.nome = nome;
+		this.descricao = descricao;
+		this.cidade = cidade;
+		this.hashId = hashId;
+	}
+
 	public Estabelecimento(String nome, Cidade cidade, String longitude, String latitude, String descricao, String hashId) {
 		setNome(nome);
 		setDescricao(descricao);
