@@ -65,7 +65,8 @@ public class PedidoService {
 		pedido.setStatus(pedidoAceito ? StatusEnum.ACEITO : StatusEnum.RECUSADO);
 		pedido = repository.save(pedido);
 
-		if(pedido.getStatus().equals(StatusEnum.ACEITO)) {
+		if(pedido.getStatus().equals(StatusEnum.ACEITO)) { //VERIFICAR ESSA REGRA, O IDEAL PE JOGAR ELA LÁ PRA CIMA PRA FAZER DURANTE NO CADASTRO DO PEDIDO,
+			//ASSIM QUE SALVAR O PEDIDO JÁ FAZER O ESTABELECIMENTO BUSCAR UM MOTOBOY, PRA JÁ INFORMAR O STATUS SE ACEITA OU NÃO.
 			// implementar logica para procurar o motoboy mais proximo do estabelecimento, para enviar a rota de onde ele tá até o estabelecimento.
 			// de acordo com a localização do estabelecimento tem que fazer uma varredura até x km pra ver se tem algum motoboy disponivel
 			//caso o motoboy estaja muito longe do estabelecimento, cancelar o pedido (mudar status). (definir o quão longe tem que está pra cancelar)
