@@ -3,7 +3,6 @@ package com.codenation.desafiofinal.model;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,7 +30,7 @@ public class Estabelecimento {
 	@Column(name = "descricao")
 	private String descricao;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name = "cidade_id")
 	private Cidade cidade;
 
