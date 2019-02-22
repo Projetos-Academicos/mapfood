@@ -35,7 +35,7 @@ public class PedidoController {
 	}
 
 	@GetMapping("/statusReport/{idPedido}")
-	public void responderStatusPedido(@PathVariable Long idPedido, @RequestParam("status") boolean pedidoAceito) {
+	public void responderStatusPedido(@PathVariable Long idPedido, @RequestParam boolean pedidoAceito) {
 		try {
 			service.statusReportByRestaurante(idPedido, pedidoAceito);
 		} catch (PedidoException e) {

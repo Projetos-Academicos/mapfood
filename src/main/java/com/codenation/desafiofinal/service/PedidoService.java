@@ -71,7 +71,6 @@ public class PedidoService {
 			//caso o motoboy estaja muito longe do estabelecimento, cancelar o pedido (mudar status). (definir o quão longe tem que está pra cancelar)
 			//caso ache o motoboy, mandar a rota pra ele e mudar o status pra EM_ANDAMENTO.
 		}
-
 	}
 
 }

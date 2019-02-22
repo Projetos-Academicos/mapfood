@@ -34,7 +34,7 @@ public class Pedido {
 
 	@NotNull
 	@ManyToMany
-	@JoinTable(name = "pedido_item", joinColumns = {@JoinColumn(name = "pedido_id") }, inverseJoinColumns = {@JoinColumn(name = "item_pedido_id") })
+	@JoinTable(name = "rel_pedido_item_pedido", joinColumns = {@JoinColumn(name = "pedido_id") }, inverseJoinColumns = {@JoinColumn(name = "item_pedido_id") })
 	private List<ItemPedido> listaItemPedido;
 
 	@NotNull
