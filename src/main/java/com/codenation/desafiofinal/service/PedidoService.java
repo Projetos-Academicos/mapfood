@@ -1,5 +1,6 @@
 package com.codenation.desafiofinal.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,16 @@ import org.springframework.stereotype.Service;
 import com.codenation.desafiofinal.enums.StatusEnum;
 import com.codenation.desafiofinal.exception.PedidoException;
 import com.codenation.desafiofinal.exception.ProdutoException;
+import com.codenation.desafiofinal.model.EntregaPedido;
+import com.codenation.desafiofinal.model.Localizacao;
+import com.codenation.desafiofinal.model.Motoboy;
 import com.codenation.desafiofinal.model.Pedido;
+import com.codenation.desafiofinal.repository.EntregaPedidoRepository;
 import com.codenation.desafiofinal.repository.ItemPedidoRepository;
+import com.codenation.desafiofinal.repository.MotoboyRepository;
 import com.codenation.desafiofinal.repository.PedidoRepository;
 import com.codenation.desafiofinal.repository.ProdutoRepository;
+import com.codenation.desafiofinal.util.MapFoodUtil;
 
 @Service
 public class PedidoService {
@@ -25,11 +32,73 @@ public class PedidoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 
+	@Autowired
+	private EntregaPedidoRepository entregaRepository;
+
+	@Autowired
+	private MotoboyRepository motoboyRepository;
+
+	public void buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) {
+
+		List<Motoboy> listaMotoboys = motoboyRepository.findAll();
+		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
+
+		listaMotoboys.forEach(motoboy -> {
+			Localizacao localizacao = new Localizacao();
+			localizacao.setLatitude(motoboy.getLocalizacao().getLatitude());
+			localizacao.setLongitude(motoboy.getLocalizacao().getLongitude());
+			listaLocalizacao.add(localizacao);
+		});
+
+		Double lat, latMenor = null;
+		Double lon, lonMenor = null;
+		Double dist;
+		Double menor = Double.MAX_VALUE;
+
+		for (Localizacao localizacao : listaLocalizacao) {
+
+			lat = Double.parseDouble(localizacao.getLatitude());
+			lon = Double.parseDouble(localizacao.getLongitude());
+			dist = MapFoodUtil.calcularDistanciaEntreDoisPontos(Double.parseDouble(localizacaoEstabelecimento.getLatitude()),Double.parseDouble(localizacaoEstabelecimento.getLongitude()), lat, lon);
+
+			if(menor > dist) {
+				latMenor = lat;
+				lonMenor = lon;
+				menor = dist;
+			}
+		}
+
+		System.out.print("lat = " + latMenor);
+		System.out.print(" lon = " + lonMenor);
+		System.out.print(" DistÃ¢ncia "+ String.format("%.2f", menor) + " Kilometers\n");
+	}
+
 	public Pedido cadastro(Pedido pedido) {
 
 		if(pedido.getStatus() == null) {
 			pedido.setStatus(StatusEnum.AGUARDANDO_RESPOSTA);
 		}
+
+		pedido.setDataRealizacaoPedido(MapFoodUtil.getDataAtual());
+
+		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedido.getEstabelecimento().getId(), StatusEnum.EM_ANDAMENTO);
+
+		listaEntregasMesmoEstabelecimento.forEach(entrega -> {
+			if(entrega.getListaPedidos() != null && entrega.getListaPedidos().size() < 5) {
+				entrega.getListaPedidos().forEach(pd ->{
+
+					Double lat1 = Double.parseDouble(pd.getCliente().getLocalizacao().getLatitude());
+					Double lon1 = Double.parseDouble(pd.getCliente().getLocalizacao().getLongitude());
+					Double lat2 = Double.parseDouble(pedido.getCliente().getLocalizacao().getLatitude());
+					Double lon2 = Double.parseDouble(pedido.getCliente().getLocalizacao().getLongitude());
+					Double distanciaCalculada = MapFoodUtil.calcularDistanciaEntreDoisPontos(lat1, lon1, lat2, lon2);
+
+					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedido.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
+						entrega.getListaPedidos().add(pedido);
+					}
+				});
+			}
+		});
 
 		pedido.setValorTotal(0d);
 		pedido.getListaItemPedido().forEach(item -> {
@@ -52,6 +121,9 @@ public class PedidoService {
 				e1.printStackTrace();
 			}
 		});
+
+
+
 
 		return repository.save(pedido);
 	}

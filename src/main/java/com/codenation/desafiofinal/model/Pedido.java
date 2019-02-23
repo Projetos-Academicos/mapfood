@@ -1,5 +1,6 @@
 package com.codenation.desafiofinal.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -13,7 +14,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.codenation.desafiofinal.enums.StatusEnum;
 
@@ -41,6 +46,16 @@ public class Pedido {
 	@ManyToOne
 	@JoinColumn(name = "estabelecimento_id")
 	private Estabelecimento estabelecimento;
+
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "data_realizacao_pedido")
+	private Date dataRealizacaoPedido;
+
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "data_finalizacao_pedido")
+	private Date dataFinalizacaoPedido;
 
 	@Column(name = "valor_total")
 	private Double valorTotal;
@@ -83,5 +98,17 @@ public class Pedido {
 	}
 	public void setValorTotal(Double valorTotal) {
 		this.valorTotal = valorTotal;
+	}
+	public Date getDataRealizacaoPedido() {
+		return dataRealizacaoPedido;
+	}
+	public void setDataRealizacaoPedido(Date dataRealizacaoPedido) {
+		this.dataRealizacaoPedido = dataRealizacaoPedido;
+	}
+	public Date getDataFinalizacaoPedido() {
+		return dataFinalizacaoPedido;
+	}
+	public void setDataFinalizacaoPedido(Date dataFinalizacaoPedido) {
+		this.dataFinalizacaoPedido = dataFinalizacaoPedido;
 	}
 }
