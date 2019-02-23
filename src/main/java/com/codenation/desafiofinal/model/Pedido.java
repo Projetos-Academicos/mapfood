@@ -16,6 +16,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -63,8 +64,19 @@ public class Pedido {
 	@Column(name = "status")
 	private StatusEnum status;
 
+	@Transient
+	private boolean isPedidoIncluidoEmUmaEntrega;
+
+	//TODO INCLUIR ATRIBUTO DA ROTA
+
 	public Cliente getCliente() {
 		return cliente;
+	}
+	public Date getDataFinalizacaoPedido() {
+		return dataFinalizacaoPedido;
+	}
+	public Date getDataRealizacaoPedido() {
+		return dataRealizacaoPedido;
 	}
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
@@ -81,8 +93,17 @@ public class Pedido {
 	public Double getValorTotal() {
 		return valorTotal;
 	}
+	public boolean isPedidoIncluidoEmUmaEntrega() {
+		return isPedidoIncluidoEmUmaEntrega;
+	}
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+	public void setDataFinalizacaoPedido(Date dataFinalizacaoPedido) {
+		this.dataFinalizacaoPedido = dataFinalizacaoPedido;
+	}
+	public void setDataRealizacaoPedido(Date dataRealizacaoPedido) {
+		this.dataRealizacaoPedido = dataRealizacaoPedido;
 	}
 	public void setEstabelecimento(Estabelecimento estabelecimento) {
 		this.estabelecimento = estabelecimento;
@@ -93,22 +114,13 @@ public class Pedido {
 	public void setListaItemPedido(List<ItemPedido> listaItemPedido) {
 		this.listaItemPedido = listaItemPedido;
 	}
+	public void setPedidoIncluidoEmUmaEntrega(boolean isPedidoIncluidoEmUmaEntrega) {
+		this.isPedidoIncluidoEmUmaEntrega = isPedidoIncluidoEmUmaEntrega;
+	}
 	public void setStatus(StatusEnum status) {
 		this.status = status;
 	}
 	public void setValorTotal(Double valorTotal) {
 		this.valorTotal = valorTotal;
-	}
-	public Date getDataRealizacaoPedido() {
-		return dataRealizacaoPedido;
-	}
-	public void setDataRealizacaoPedido(Date dataRealizacaoPedido) {
-		this.dataRealizacaoPedido = dataRealizacaoPedido;
-	}
-	public Date getDataFinalizacaoPedido() {
-		return dataFinalizacaoPedido;
-	}
-	public void setDataFinalizacaoPedido(Date dataFinalizacaoPedido) {
-		this.dataFinalizacaoPedido = dataFinalizacaoPedido;
 	}
 }

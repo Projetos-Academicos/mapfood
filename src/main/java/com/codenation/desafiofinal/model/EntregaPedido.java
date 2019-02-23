@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -27,8 +30,12 @@ public class EntregaPedido {
 	@OneToMany(mappedBy = "entrega")
 	private List<Pedido> listaPedidos = new ArrayList<Pedido>(5);
 
+
+	@ManyToMany
 	private List<Cliente> listaClientes = new ArrayList<Cliente>(5);
 
+	@ManyToOne
+	@JoinColumn(name = "motoboy_id")
 	private Motoboy motoboy;
 
 	private Estabelecimento estabelecimento;

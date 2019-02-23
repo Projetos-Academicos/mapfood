@@ -38,7 +38,7 @@ public class PedidoService {
 	@Autowired
 	private MotoboyRepository motoboyRepository;
 
-	public void buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) {
+	public void buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) { //TODO CONCLUIR IMPLEMENTAÇÃO DO CODIGO DO RUBENS
 
 		List<Motoboy> listaMotoboys = motoboyRepository.findAll();
 		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
@@ -81,6 +81,8 @@ public class PedidoService {
 
 		pedido.setDataRealizacaoPedido(MapFoodUtil.getDataAtual());
 
+		pedido.setPedidoIncluidoEmUmaEntrega(false);
+
 		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedido.getEstabelecimento().getId(), StatusEnum.EM_ANDAMENTO);
 
 		listaEntregasMesmoEstabelecimento.forEach(entrega -> {
@@ -95,10 +97,21 @@ public class PedidoService {
 
 					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedido.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
 						entrega.getListaPedidos().add(pedido);
+						pedido.setPedidoIncluidoEmUmaEntrega(true);
+						entregaRepository.save(entrega);
 					}
 				});
 			}
 		});
+
+		if(!pedido.isPedidoIncluidoEmUmaEntrega()) {
+			EntregaPedido entrega = new EntregaPedido();
+
+
+		}
+
+
+
 
 		pedido.setValorTotal(0d);
 		pedido.getListaItemPedido().forEach(item -> {
@@ -121,9 +134,6 @@ public class PedidoService {
 				e1.printStackTrace();
 			}
 		});
-
-
-
 
 		return repository.save(pedido);
 	}
