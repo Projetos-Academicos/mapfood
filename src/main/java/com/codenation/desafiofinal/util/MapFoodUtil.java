@@ -6,8 +6,6 @@ import java.util.Date;
 import org.joda.time.DateTime;
 import org.joda.time.Minutes;
 
-import com.codenation.desafiofinal.enums.StatusEnum;
-
 public class MapFoodUtil {
 
 	public static Double calcularDistanciaEntreDoisPontos(Double lat1, Double lon1, Double lat2, Double lon2) {
@@ -55,38 +53,4 @@ public class MapFoodUtil {
 		return (rad * 180 / Math.PI);
 	}
 
-
-	public static String statusEnumToString(StatusEnum status) {
-		if(status.equals(StatusEnum.AGUARDANDO_RESPOSTA)) {
-			return "AGUARDANDO_RESPOSTA";
-		}else if(status.equals(StatusEnum.ACEITO)) {
-			return "ACEITO";
-		}else if(status.equals(StatusEnum.RECUSADO)) {
-			return "RECUSADO";
-		}else if(status.equals(StatusEnum.EM_ANDAMENTO)) {
-			return "EM_ANDAMENTO";
-		}else if(status.equals(StatusEnum.CANCELADO)) {
-			return "CANCELADO";
-		}else if(status.equals(StatusEnum.FINALIZADO)) {
-			return "FINALIZADO";
-		}
-		return null;
-	}
-
-	public static StatusEnum stringToStatusEnum( String status) {
-		if(status.equals("AGUARDANDO_RESPOSTA")) {
-			return StatusEnum.AGUARDANDO_RESPOSTA;
-		}else if(status.equals("ACEITO")) {
-			return StatusEnum.ACEITO;
-		}else if(status.equals("RECUSADO")) {
-			return StatusEnum.RECUSADO ;
-		}else if(status.equals("EM_ANDAMENTO")) {
-			return StatusEnum.EM_ANDAMENTO;
-		}else if(status.equals("CANCELADO")) {
-			return StatusEnum.CANCELADO;
-		}else if(status.equals("FINALIZADO")) {
-			return StatusEnum.FINALIZADO;
-		}
-		return null;
-	}
 }

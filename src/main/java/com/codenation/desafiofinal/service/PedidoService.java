@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.codenation.desafiofinal.enums.StatusEnum;
+import com.codenation.desafiofinal.constante.ConstantesStatus;
 import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.Cliente;
 import com.codenation.desafiofinal.model.EntregaPedido;
@@ -61,7 +61,7 @@ public class PedidoService {
 		List<Motoboy> listaMotoboys = motoboyRepository.findAll(); //TODO IMPLEMENTAR FILTRO PRA ELIMINAR MOTOBOYS QUE TÃO COM ENTREGA EM ANDAMENTO
 		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
 
-		listaMotoboys.forEach(motoboy -> {
+		listaMotoboys.forEach(motoboy -> { // TODO REFATORAR ESSE METODO (DIVIDIR EM METODOS MENORES)
 			Localizacao localizacao = new Localizacao();
 			localizacao.setLatitude(motoboy.getLocalizacao().getLatitude());
 			localizacao.setLongitude(motoboy.getLocalizacao().getLongitude());
@@ -98,10 +98,10 @@ public class PedidoService {
 		Motoboy motoboySelecionado = buscarMotoboyDisponivelMaisProximo(pedidoCompleto.getEstabelecimento().getLocalizacao());
 
 		if(!pedidoCompleto.isPedidoIncluidoEmUmaEntrega()) {
-			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO) , motoboySelecionado);
+			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), ConstantesStatus.EM_ANDAMENTO, motoboySelecionado);
 			entrega = entregaRepository.save(entrega);
 			pedidoCompleto.setEntrega(entrega);
-			pedidoCompleto.setStatus(MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO)); //TODO MUDAR DE STATUS ENUM PRA CONSTANTES (JA DEIXA EM STRING)
+			pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO); //TODO MUDAR DE STATUS ENUM PRA CONSTANTES (JA DEIXA EM STRING)
 		}
 
 		return repository.save(pedidoCompleto);
@@ -120,7 +120,7 @@ public class PedidoService {
 
 	public Pedido completarInformacoesDoPedido(Pedido pedido) throws ResourceNotFoundException {
 
-		pedido.setStatus(MapFoodUtil.statusEnumToString(StatusEnum.AGUARDANDO_RESPOSTA));
+		pedido.setStatus(ConstantesStatus.AGUARDANDO_RESPOSTA);
 		pedido.setDataRealizacaoPedido(MapFoodUtil.getDataAtual());
 		pedido.setPedidoIncluidoEmUmaEntrega(false);
 
@@ -166,7 +166,7 @@ public class PedidoService {
 	}
 	public Pedido determinarSeOPedidoEntraEmUmaEntregaExistente(Pedido pedidoCompleto) {
 
-		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO));
+		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), ConstantesStatus.EM_ANDAMENTO);
 
 		for (EntregaPedido entrega : listaEntregasMesmoEstabelecimento) {
 			if(!CollectionUtils.isEmpty(entrega.getListaPedidos()) && entrega.getListaPedidos().size() < 5) {
@@ -181,7 +181,7 @@ public class PedidoService {
 					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedidoCompleto.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
 						pedidoCompleto.setPedidoIncluidoEmUmaEntrega(true);
 						pedidoCompleto.setEntrega(entrega);
-						pedidoCompleto.setStatus(MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO));
+						pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO);
 					}
 				}
 			}
