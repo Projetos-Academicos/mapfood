@@ -24,6 +24,7 @@ import com.codenation.desafiofinal.repository.MotoboyRepository;
 import com.codenation.desafiofinal.repository.ProdutoRepository;
 
 @Service
+@Transactional(readOnly = false)
 public class PopularBancoService {
 
 	@Autowired
@@ -41,7 +42,6 @@ public class PopularBancoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 
-	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaClienteApartirDoClienteCSV() {
 
 		try {
@@ -65,7 +65,6 @@ public class PopularBancoService {
 		}
 	}
 
-	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaEstabelecimentoApartirDoEstabelecimentoCSV() {
 
 		try {
@@ -96,7 +95,6 @@ public class PopularBancoService {
 		}
 	}
 
-	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaMotoboyApartirDoMotoboyCSV() {
 
 		try {
@@ -120,7 +118,6 @@ public class PopularBancoService {
 		}
 	}
 
-	@Transactional(rollbackFor=Exception.class)
 	public void popularTabelaProdutoApartirDoProdutoCSV() {
 
 		try {

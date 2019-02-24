@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codenation.desafiofinal.exception.PedidoException;
+import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.Pedido;
 import com.codenation.desafiofinal.service.PedidoService;
 
@@ -26,7 +27,15 @@ public class PedidoController {
 
 	@PostMapping
 	public Pedido cadastro(@Valid @RequestBody Pedido pedido) {
-		return service.cadastro(pedido);
+		try {
+
+			return service.cadastrarPedido(pedido);
+
+		} catch (ResourceNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	@GetMapping

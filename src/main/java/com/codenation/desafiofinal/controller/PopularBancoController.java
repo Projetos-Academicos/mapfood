@@ -14,20 +14,12 @@ public class PopularBancoController {
 	@Autowired
 	private PopularBancoService popularBanco;
 
-	@GetMapping("/cliente")
-	public void popularTabelaCliente() {
-		popularBanco.popularTabelaClienteApartirDoClienteCSV();
-	}
-
-	@GetMapping("/estabelecimento-produto")
+	@GetMapping
 	public void popularTabelaEstabelecimento() {
+		popularBanco.popularTabelaClienteApartirDoClienteCSV();
+		popularBanco.popularTabelaMotoboyApartirDoMotoboyCSV();
 		popularBanco.popularTabelaEstabelecimentoApartirDoEstabelecimentoCSV();
 		popularBanco.popularTabelaProdutoApartirDoProdutoCSV();
-	}
-
-	@GetMapping("/motoboy")
-	public void popularTabelaMotoboy() {
-		popularBanco.popularTabelaMotoboyApartirDoMotoboyCSV();
 	}
 
 }

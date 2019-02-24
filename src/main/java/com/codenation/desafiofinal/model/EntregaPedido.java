@@ -1,6 +1,5 @@
 package com.codenation.desafiofinal.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -9,13 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import com.codenation.desafiofinal.enums.StatusEnum;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "entrega")
@@ -27,20 +26,35 @@ public class EntregaPedido {
 	@Column(name = "id")
 	private Long id;
 
+	@Size(max = 5)
 	@OneToMany(mappedBy = "entrega")
-	private List<Pedido> listaPedidos = new ArrayList<Pedido>(5);
+	private List<Pedido> listaPedidos;
 
-
+	@Size(max = 5)
 	@ManyToMany
-	private List<Cliente> listaClientes = new ArrayList<Cliente>(5);
+	@JoinTable(name = "rel_entrega_cliente", joinColumns = {@JoinColumn(name = "entrega_id") }, inverseJoinColumns = {@JoinColumn(name = "cliente_id") })
+	private List<Cliente> listaClientes;
 
 	@ManyToOne
 	@JoinColumn(name = "motoboy_id")
 	private Motoboy motoboy;
 
+	@ManyToOne
+	@JoinColumn(name = "estabelecimento_id")
 	private Estabelecimento estabelecimento;
 
-	private StatusEnum statusEntrega;
+	@Column(name = "status")
+	private String statusEntrega;
+
+	public EntregaPedido() {
+
+	}
+
+	public EntregaPedido(Estabelecimento estabelecimento, String statusEntrega, Motoboy motoboy) {
+		setEstabelecimento(estabelecimento);
+		setStatusEntrega(statusEntrega);
+		setMotoboy(motoboy);
+	}
 
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
@@ -57,9 +71,6 @@ public class EntregaPedido {
 	public Motoboy getMotoboy() {
 		return motoboy;
 	}
-	public StatusEnum getStatusEntrega() {
-		return statusEntrega;
-	}
 	public void setEstabelecimento(Estabelecimento estabelecimento) {
 		this.estabelecimento = estabelecimento;
 	}
@@ -75,8 +86,12 @@ public class EntregaPedido {
 	public void setMotoboy(Motoboy motoboy) {
 		this.motoboy = motoboy;
 	}
-	public void setStatusEntrega(StatusEnum statusEntrega) {
-		this.statusEntrega = statusEntrega;
+
+	public String getStatusEntrega() {
+		return statusEntrega;
 	}
 
+	public void setStatusEntrega(String statusEntrega) {
+		this.statusEntrega = statusEntrega;
+	}
 }

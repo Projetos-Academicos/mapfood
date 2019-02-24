@@ -21,8 +21,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.codenation.desafiofinal.enums.StatusEnum;
-
 @Entity
 @Table(name = "pedido")
 public class Pedido {
@@ -58,16 +56,21 @@ public class Pedido {
 	@Column(name = "data_finalizacao_pedido")
 	private Date dataFinalizacaoPedido;
 
+	@ManyToOne
+	@JoinColumn(name = "entrega_id")
+	private EntregaPedido entrega;
+
 	@Column(name = "valor_total")
 	private Double valorTotal;
 
 	@Column(name = "status")
-	private StatusEnum status;
+	private String status;
 
 	@Transient
 	private boolean isPedidoIncluidoEmUmaEntrega;
 
 	//TODO INCLUIR ATRIBUTO DA ROTA
+	//TODO INCLUIR ATRIBUTO DE MINUTOS APROXIMADO PRA FAZER A ENTREGA
 
 	public Cliente getCliente() {
 		return cliente;
@@ -78,6 +81,9 @@ public class Pedido {
 	public Date getDataRealizacaoPedido() {
 		return dataRealizacaoPedido;
 	}
+	public EntregaPedido getEntrega() {
+		return entrega;
+	}
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
 	}
@@ -87,7 +93,7 @@ public class Pedido {
 	public List<ItemPedido> getListaItemPedido() {
 		return listaItemPedido;
 	}
-	public StatusEnum getStatus() {
+	public String getStatus() {
 		return status;
 	}
 	public Double getValorTotal() {
@@ -105,6 +111,9 @@ public class Pedido {
 	public void setDataRealizacaoPedido(Date dataRealizacaoPedido) {
 		this.dataRealizacaoPedido = dataRealizacaoPedido;
 	}
+	public void setEntrega(EntregaPedido entrega) {
+		this.entrega = entrega;
+	}
 	public void setEstabelecimento(Estabelecimento estabelecimento) {
 		this.estabelecimento = estabelecimento;
 	}
@@ -117,7 +126,7 @@ public class Pedido {
 	public void setPedidoIncluidoEmUmaEntrega(boolean isPedidoIncluidoEmUmaEntrega) {
 		this.isPedidoIncluidoEmUmaEntrega = isPedidoIncluidoEmUmaEntrega;
 	}
-	public void setStatus(StatusEnum status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	public void setValorTotal(Double valorTotal) {
