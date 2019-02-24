@@ -3,6 +3,7 @@ package com.codenation.desafiofinal.model;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -46,6 +47,9 @@ public class EntregaPedido {
 	@Column(name = "status")
 	private String statusEntrega;
 
+	@Embedded
+	private DadosRota dadosRota;
+
 	public EntregaPedido() {
 
 	}
@@ -56,6 +60,9 @@ public class EntregaPedido {
 		setMotoboy(motoboy);
 	}
 
+	public DadosRota getDadosRota() {
+		return dadosRota;
+	}
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
 	}
@@ -71,24 +78,29 @@ public class EntregaPedido {
 	public Motoboy getMotoboy() {
 		return motoboy;
 	}
+	public String getStatusEntrega() {
+		return statusEntrega;
+	}
+	public void setDadosRota(DadosRota dadosRota) {
+		this.dadosRota = dadosRota;
+	}
 	public void setEstabelecimento(Estabelecimento estabelecimento) {
 		this.estabelecimento = estabelecimento;
 	}
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public void setListaClientes(List<Cliente> listaClientes) {
 		this.listaClientes = listaClientes;
 	}
+
 	public void setListaPedidos(List<Pedido> listaPedidos) {
 		this.listaPedidos = listaPedidos;
 	}
+
 	public void setMotoboy(Motoboy motoboy) {
 		this.motoboy = motoboy;
-	}
-
-	public String getStatusEntrega() {
-		return statusEntrega;
 	}
 
 	public void setStatusEntrega(String statusEntrega) {

@@ -8,5 +8,6 @@ import com.codenation.desafiofinal.model.EntregaPedido;
 
 public interface EntregaPedidoRepository extends JpaRepository<EntregaPedido, Long> {
 
+	Long countByMotoboyIdAndStatusEntrega(Long idMotoboy, String statusEntrega);
 	List<EntregaPedido> findByEstabelecimentoIdAndStatusEntrega(Long idEstabelecimento, String statusEntrega);
 }

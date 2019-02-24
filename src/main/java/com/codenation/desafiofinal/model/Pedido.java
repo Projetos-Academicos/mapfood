@@ -69,9 +69,6 @@ public class Pedido {
 	@Transient
 	private boolean isPedidoIncluidoEmUmaEntrega;
 
-	//TODO INCLUIR ATRIBUTO DA ROTA
-	//TODO INCLUIR ATRIBUTO DE MINUTOS APROXIMADO PRA FAZER A ENTREGA
-
 	public Cliente getCliente() {
 		return cliente;
 	}

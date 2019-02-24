@@ -56,39 +56,35 @@ public class PedidoService {
 	@Autowired
 	private EstabelecimentoRepository estabelecimentoRepository;
 
-	public Motoboy buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) { //TODO CONCLUIR IMPLEMENTAÇÃO DO CODIGO DO RUBENS
+	@Autowired
+	private GoogleMapService googleMapsService;
 
-		List<Motoboy> listaMotoboys = motoboyRepository.findAll(); //TODO IMPLEMENTAR FILTRO PRA ELIMINAR MOTOBOYS QUE TÃO COM ENTREGA EM ANDAMENTO
-		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
+	public Motoboy buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) {
 
-		listaMotoboys.forEach(motoboy -> { // TODO REFATORAR ESSE METODO (DIVIDIR EM METODOS MENORES)
-			Localizacao localizacao = new Localizacao();
-			localizacao.setLatitude(motoboy.getLocalizacao().getLatitude());
-			localizacao.setLongitude(motoboy.getLocalizacao().getLongitude());
-			listaLocalizacao.add(localizacao);
-		});
+		List<Motoboy> listaMotoboys = motoboyRepository.findAll();
+		List<Localizacao> listaLocalizacao = obterLocalizacaoDosMotoboys(listaMotoboys);
 
-		Double lat, latMenor = null;
-		Double lon, lonMenor = null;
-		Double dist;
-		Double menor = Double.MAX_VALUE;
+		Double latitudeMotoboy, menorLatitude = null;
+		Double longitudeMotoboy, menorLongitude = null;
+		Double distanciaMotoboy;
+		Double menorDistancia = Double.MAX_VALUE;
 
 		for (Localizacao localizacao : listaLocalizacao) {
 
-			lat = Double.parseDouble(localizacao.getLatitude());
-			lon = Double.parseDouble(localizacao.getLongitude());
-			dist = MapFoodUtil.calcularDistanciaEntreDoisPontos(Double.parseDouble(localizacaoEstabelecimento.getLatitude()),Double.parseDouble(localizacaoEstabelecimento.getLongitude()), lat, lon);
+			latitudeMotoboy = Double.parseDouble(localizacao.getLatitude());
+			longitudeMotoboy = Double.parseDouble(localizacao.getLongitude());
+			distanciaMotoboy = MapFoodUtil.calcularDistanciaEntreDoisPontos(Double.parseDouble(localizacaoEstabelecimento.getLatitude()),Double.parseDouble(localizacaoEstabelecimento.getLongitude()), latitudeMotoboy, longitudeMotoboy);
 
-			if(menor > dist) {
-				latMenor = lat;
-				lonMenor = lon;
-				menor = dist;
+			if(menorDistancia > distanciaMotoboy) {
+				menorLatitude = latitudeMotoboy;
+				menorLongitude = longitudeMotoboy;
+				menorDistancia = distanciaMotoboy;
 			}
 		}
 
-		//		System.out.print(" DistÃ¢ncia "+ String.format("%.2f", menor) + " Kilometers\n");
-		return motoboyRepository.findByLocalizacaoLatitudeAndLocalizacaoLongitude(latMenor.toString(), lonMenor.toString());
+		return motoboyRepository.findByLocalizacaoLatitudeAndLocalizacaoLongitude(menorLatitude.toString(), menorLongitude.toString());
 	}
+
 	@Transactional(readOnly = false)
 	public Pedido cadastrarPedido(Pedido pedido) throws ResourceNotFoundException {
 
@@ -101,19 +97,18 @@ public class PedidoService {
 			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), ConstantesStatus.EM_ANDAMENTO, motoboySelecionado);
 			entrega = entregaRepository.save(entrega);
 			pedidoCompleto.setEntrega(entrega);
-			pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO); //TODO MUDAR DE STATUS ENUM PRA CONSTANTES (JA DEIXA EM STRING)
+			pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO);
 		}
 
 		return repository.save(pedidoCompleto);
 	}
+	private Double calcularDistanciaEntreDoisPontos(Localizacao localizacao1, Localizacao localizacao2) {
 
-	private Double calcularDistanciaEntreOsPedidos(Pedido novoPedido, Pedido pedidoJaRealizado) {
-
-		Double lat1 = Double.parseDouble(pedidoJaRealizado.getCliente().getLocalizacao().getLatitude());
-		Double lon1 = Double.parseDouble(pedidoJaRealizado.getCliente().getLocalizacao().getLongitude());
-		Double lat2 = Double.parseDouble(novoPedido.getCliente().getLocalizacao().getLatitude());
-		Double lon2 = Double.parseDouble(novoPedido.getCliente().getLocalizacao().getLongitude());
-		Double distanciaCalculada = MapFoodUtil.calcularDistanciaEntreDoisPontos(lat1, lon1, lat2, lon2);
+		Double latitude1 = Double.parseDouble(localizacao1.getLatitude());
+		Double longitude1 = Double.parseDouble(localizacao1.getLongitude());
+		Double latitude2 = Double.parseDouble(localizacao2.getLatitude());
+		Double longitude2 = Double.parseDouble(localizacao2.getLongitude());
+		Double distanciaCalculada = MapFoodUtil.calcularDistanciaEntreDoisPontos(latitude1, longitude1, latitude2, longitude2);
 
 		return distanciaCalculada;
 	}
@@ -164,6 +159,7 @@ public class PedidoService {
 
 		return pedido;
 	}
+
 	public Pedido determinarSeOPedidoEntraEmUmaEntregaExistente(Pedido pedidoCompleto) {
 
 		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), ConstantesStatus.EM_ANDAMENTO);
@@ -176,7 +172,7 @@ public class PedidoService {
 						break;
 					}
 
-					Double distanciaCalculada = calcularDistanciaEntreOsPedidos(pedidoCompleto, pd);
+					Double distanciaCalculada = calcularDistanciaEntreDoisPontos(pedidoCompleto.getCliente().getLocalizacao(), pd.getCliente().getLocalizacao());
 
 					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedidoCompleto.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
 						pedidoCompleto.setPedidoIncluidoEmUmaEntrega(true);
@@ -196,9 +192,25 @@ public class PedidoService {
 
 		return pedidoCompleto;
 	}
-
 	public List<Pedido> listarTodos(){
 		return repository.findAll();
+	}
+
+	private List<Localizacao> obterLocalizacaoDosMotoboys(List<Motoboy> listaMotoboys) {
+
+		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
+		listaMotoboys.forEach(motoboy -> {
+			Long countEntregasEmAbertas = entregaRepository.countByMotoboyIdAndStatusEntrega(motoboy.getId(), ConstantesStatus.EM_ANDAMENTO);
+
+			if(!(countEntregasEmAbertas > 0)) {
+				Localizacao localizacao = new Localizacao();
+				localizacao.setLatitude(motoboy.getLocalizacao().getLatitude());
+				localizacao.setLongitude(motoboy.getLocalizacao().getLongitude());
+				listaLocalizacao.add(localizacao);
+			}
+		});
+
+		return listaLocalizacao;
 	}
 
 }

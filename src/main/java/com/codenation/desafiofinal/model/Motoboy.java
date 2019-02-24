@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class Motoboy {
 	@Embedded
 	private Localizacao localizacao;
 
-	@OneToMany(mappedBy = "motoboy")
+	@OneToMany(mappedBy = "motoboy", fetch = FetchType.LAZY)
 	private List<EntregaPedido> listaEntregas;
 
 	public Motoboy() {
