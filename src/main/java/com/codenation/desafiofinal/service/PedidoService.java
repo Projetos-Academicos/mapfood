@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.codenation.desafiofinal.enums.StatusEnum;
-import com.codenation.desafiofinal.exception.PedidoException;
 import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.Cliente;
 import com.codenation.desafiofinal.model.EntregaPedido;
@@ -99,12 +98,24 @@ public class PedidoService {
 		Motoboy motoboySelecionado = buscarMotoboyDisponivelMaisProximo(pedidoCompleto.getEstabelecimento().getLocalizacao());
 
 		if(!pedidoCompleto.isPedidoIncluidoEmUmaEntrega()) {
-			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), MapFoodUtil.statusEnumToString(StatusEnum.AGUARDANDO_RESPOSTA) , motoboySelecionado);
+			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO) , motoboySelecionado);
 			entrega = entregaRepository.save(entrega);
 			pedidoCompleto.setEntrega(entrega);
+			pedidoCompleto.setStatus(MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO)); //TODO MUDAR DE STATUS ENUM PRA CONSTANTES (JA DEIXA EM STRING)
 		}
 
 		return repository.save(pedidoCompleto);
+	}
+
+	private Double calcularDistanciaEntreOsPedidos(Pedido novoPedido, Pedido pedidoJaRealizado) {
+
+		Double lat1 = Double.parseDouble(pedidoJaRealizado.getCliente().getLocalizacao().getLatitude());
+		Double lon1 = Double.parseDouble(pedidoJaRealizado.getCliente().getLocalizacao().getLongitude());
+		Double lat2 = Double.parseDouble(novoPedido.getCliente().getLocalizacao().getLatitude());
+		Double lon2 = Double.parseDouble(novoPedido.getCliente().getLocalizacao().getLongitude());
+		Double distanciaCalculada = MapFoodUtil.calcularDistanciaEntreDoisPontos(lat1, lon1, lat2, lon2);
+
+		return distanciaCalculada;
 	}
 
 	public Pedido completarInformacoesDoPedido(Pedido pedido) throws ResourceNotFoundException {
@@ -153,52 +164,41 @@ public class PedidoService {
 
 		return pedido;
 	}
-
 	public Pedido determinarSeOPedidoEntraEmUmaEntregaExistente(Pedido pedidoCompleto) {
 
 		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO));
 
-		listaEntregasMesmoEstabelecimento.forEach(entrega -> {
+		for (EntregaPedido entrega : listaEntregasMesmoEstabelecimento) {
 			if(!CollectionUtils.isEmpty(entrega.getListaPedidos()) && entrega.getListaPedidos().size() < 5) {
-				entrega.getListaPedidos().forEach(pd ->{
+				for (Pedido pd : entrega.getListaPedidos()) {
 
-					Double lat1 = Double.parseDouble(pd.getCliente().getLocalizacao().getLatitude());
-					Double lon1 = Double.parseDouble(pd.getCliente().getLocalizacao().getLongitude());
-					Double lat2 = Double.parseDouble(pedidoCompleto.getCliente().getLocalizacao().getLatitude());
-					Double lon2 = Double.parseDouble(pedidoCompleto.getCliente().getLocalizacao().getLongitude());
-					Double distanciaCalculada = MapFoodUtil.calcularDistanciaEntreDoisPontos(lat1, lon1, lat2, lon2);
+					if(pedidoCompleto.getEntrega() != null ) {
+						break;
+					}
+
+					Double distanciaCalculada = calcularDistanciaEntreOsPedidos(pedidoCompleto, pd);
 
 					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedidoCompleto.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
-						Long count = repository.countByEntregaId(entrega.getId());
-						if(count > 5) {
-							entrega.getListaPedidos().add(pedidoCompleto);
-							pedidoCompleto.setPedidoIncluidoEmUmaEntrega(true);
-							pedidoCompleto.setEntrega(entrega);
-							entregaRepository.save(entrega);
-						}
+						pedidoCompleto.setPedidoIncluidoEmUmaEntrega(true);
+						pedidoCompleto.setEntrega(entrega);
+						pedidoCompleto.setStatus(MapFoodUtil.statusEnumToString(StatusEnum.EM_ANDAMENTO));
 					}
-				});
+				}
 			}
-		});
+		}
+
+		if(pedidoCompleto.getEntrega() != null) {
+			Integer indexEntrega = listaEntregasMesmoEstabelecimento.indexOf(pedidoCompleto.getEntrega());
+			EntregaPedido entrega = listaEntregasMesmoEstabelecimento.get(indexEntrega);
+			entrega.getListaPedidos().add(pedidoCompleto);
+			entregaRepository.save(entrega);
+		}
 
 		return pedidoCompleto;
 	}
 
 	public List<Pedido> listarTodos(){
 		return repository.findAll();
-	}
-
-	public void statusReportByRestaurante(Long idPedido, boolean pedidoAceito) throws PedidoException {
-		Pedido pedido = repository.findById(idPedido).orElseThrow(() -> new PedidoException("Pedido não encontrado ::" + idPedido));
-		pedido = repository.save(pedido);
-
-		if(pedido.getStatus().equals(StatusEnum.ACEITO)) { //VERIFICAR ESSA REGRA, O IDEAL PE JOGAR ELA LÁ PRA CIMA PRA FAZER DURANTE NO CADASTRO DO PEDIDO,
-			//ASSIM QUE SALVAR O PEDIDO JÁ FAZER O ESTABELECIMENTO BUSCAR UM MOTOBOY, PRA JÁ INFORMAR O STATUS SE ACEITA OU NÃO.
-			// implementar logica para procurar o motoboy mais proximo do estabelecimento, para enviar a rota de onde ele tá até o estabelecimento.
-			// de acordo com a localização do estabelecimento tem que fazer uma varredura até x km pra ver se tem algum motoboy disponivel
-			//caso o motoboy estaja muito longe do estabelecimento, cancelar o pedido (mudar status). (definir o quão longe tem que está pra cancelar)
-			//caso ache o motoboy, mandar a rota pra ele e mudar o status pra EM_ANDAMENTO.
-		}
 	}
 
 }
