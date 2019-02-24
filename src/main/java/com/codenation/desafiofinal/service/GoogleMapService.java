@@ -22,10 +22,6 @@ public class GoogleMapService {
 	@Autowired
 	private GoogleMapsConfig googleMapsConfig;
 
-	public List<Rota> buscarRotas(Localizacao origem, Localizacao destino) {
-		return buscarRotas(origem, destino, new ArrayList<>());
-	}
-
 	public List<Rota> buscarRotas(Localizacao origem, Localizacao destino, List<Localizacao> listaPontosParadas) {
 		LatLng localizacaoOrigem = converterLocalizacaoPraLatLng(origem);
 		LatLng localizacaoDestino = converterLocalizacaoPraLatLng(destino);
@@ -40,8 +36,14 @@ public class GoogleMapService {
 				.collect(Collectors.toList());
 	}
 
+	public Rota buscarUnicaRota(Localizacao origem, Localizacao destino) {
+		List<Rota> listaComUmaRota = buscarRotas(origem, destino, new ArrayList<>());
+		Rota rota = listaComUmaRota.get(0);
+		return rota;
+	}
+
 	private LatLng converterLocalizacaoPraLatLng(Localizacao localizacao) {
-		return new LatLng( Double.parseDouble(localizacao.getLatitude()), Double.parseDouble(localizacao.getLongitude()));
+		return new LatLng(Double.parseDouble(localizacao.getLatitude()), Double.parseDouble(localizacao.getLongitude()));
 	}
 
 	public InformacaoRota estimarTempoEDistancia(Localizacao localizacaoEstabelecimento, List<Localizacao> listaLocalizacao) {

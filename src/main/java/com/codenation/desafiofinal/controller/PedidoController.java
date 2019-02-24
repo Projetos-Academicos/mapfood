@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codenation.desafiofinal.dto.PedidoDTO;
+import com.codenation.desafiofinal.exception.PedidoException;
 import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.ItemPedido;
 import com.codenation.desafiofinal.model.Pedido;
@@ -38,7 +39,7 @@ public class PedidoController {
 					pedidoSalvo.getEstabelecimento().getNome(), pedidoSalvo.getDataRealizacaoPedido(), pedidoSalvo.getEntrega().getId(), pedidoSalvo.getStatus());
 			return pedidoResponse;
 
-		} catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException | PedidoException e) {
 			e.printStackTrace();
 		}
 

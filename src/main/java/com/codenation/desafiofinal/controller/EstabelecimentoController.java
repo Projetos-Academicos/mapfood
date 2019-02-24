@@ -21,5 +21,4 @@ public class EstabelecimentoController {
 	public List<Estabelecimento> listarTodos(){
 		return service.listarTodos();
 	}
-
 }

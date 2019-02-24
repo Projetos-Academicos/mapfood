@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.codenation.desafiofinal.constante.ConstantesStatus;
+import com.codenation.desafiofinal.exception.PedidoException;
 import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.Cliente;
 import com.codenation.desafiofinal.model.EntregaPedido;
@@ -56,9 +57,6 @@ public class PedidoService {
 	@Autowired
 	private EstabelecimentoRepository estabelecimentoRepository;
 
-	@Autowired
-	private GoogleMapService googleMapsService;
-
 	public Motoboy buscarMotoboyDisponivelMaisProximo(Localizacao localizacaoEstabelecimento) {
 
 		List<Motoboy> listaMotoboys = motoboyRepository.findAll();
@@ -82,11 +80,15 @@ public class PedidoService {
 			}
 		}
 
+		//		if(menorDistancia > 20d) { //TODO VALIDAÇÃO DE DISTANCIA MAXIMA ENTRE MOTOBOY E ESTABELECIMENTO, RETIRAR SOMENTE NO AMBIENTE DE TESTE
+		//			return null;
+		//		}
+
 		return motoboyRepository.findByLocalizacaoLatitudeAndLocalizacaoLongitude(menorLatitude.toString(), menorLongitude.toString());
 	}
 
 	@Transactional(readOnly = false)
-	public Pedido cadastrarPedido(Pedido pedido) throws ResourceNotFoundException {
+	public Pedido cadastrarPedido(Pedido pedido) throws ResourceNotFoundException, PedidoException {
 
 		Pedido pedidoCompleto = completarInformacoesDoPedido(pedido);
 		pedidoCompleto = determinarSeOPedidoEntraEmUmaEntregaExistente(pedidoCompleto);
@@ -94,10 +96,15 @@ public class PedidoService {
 		Motoboy motoboySelecionado = buscarMotoboyDisponivelMaisProximo(pedidoCompleto.getEstabelecimento().getLocalizacao());
 
 		if(!pedidoCompleto.isPedidoIncluidoEmUmaEntrega()) {
-			EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), ConstantesStatus.EM_ANDAMENTO, motoboySelecionado);
-			entrega = entregaRepository.save(entrega);
-			pedidoCompleto.setEntrega(entrega);
-			pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO);
+
+			if(motoboySelecionado == null) {
+				throw new PedidoException("Não foi possível concluir o pedido por falta de motoboy disponível na sua região, tente novamente mais tarde! ");
+			}else {
+				EntregaPedido entrega = new EntregaPedido(pedidoCompleto.getEstabelecimento(), ConstantesStatus.AGUARDANDO_RESPOSTA, motoboySelecionado);
+				entrega = entregaRepository.save(entrega);
+				pedidoCompleto.setEntrega(entrega);
+			}
+
 		}
 
 		return repository.save(pedidoCompleto);
@@ -177,7 +184,6 @@ public class PedidoService {
 					if(MapFoodUtil.getMinutosFromTimes(pd.getDataRealizacaoPedido(), pedidoCompleto.getDataRealizacaoPedido()) <= 2 && distanciaCalculada <= 5d) {
 						pedidoCompleto.setPedidoIncluidoEmUmaEntrega(true);
 						pedidoCompleto.setEntrega(entrega);
-						pedidoCompleto.setStatus(ConstantesStatus.EM_ANDAMENTO);
 					}
 				}
 			}

@@ -1,20 +1,11 @@
 package com.codenation.desafiofinal.model;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-
 import com.google.maps.model.DirectionsStep;
 
-@Embeddable
 public class InstrucaoRota {
 
-	@Column(name = "distancia")
 	private Long distancia;
-
-	@Column(name = "duracao")
 	private Long duracao;
-
-	@Column(name = "instrucao" )
 	private String instrucao;
 
 	public InstrucaoRota(DirectionsStep step) {
