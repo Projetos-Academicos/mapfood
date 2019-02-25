@@ -23,7 +23,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "pedido")
-public class Pedido {
+public class Pedido implements Comparable<Pedido> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_pedido")
@@ -69,6 +69,10 @@ public class Pedido {
 	@Transient
 	private boolean isPedidoIncluidoEmUmaEntrega;
 
+	@Override
+	public int compareTo(Pedido o) {
+		return dataRealizacaoPedido.compareTo(o.getDataRealizacaoPedido());
+	}
 	public Cliente getCliente() {
 		return cliente;
 	}

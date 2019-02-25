@@ -36,7 +36,13 @@ public class RotaController {
 	@GetMapping("/motoboy-entrega-pedidos/{idEntrega}")
 	public List<Rota> buscarRotasMotoboyClientesPorOrdemHorarioPedido(@PathVariable Long idEntrega){
 
-		service.definirRotaParaEntregarPedidosAosClientes(idEntrega);
+		try {
+
+			return service.definirRotaParaEntregarPedidosAosClientes(idEntrega);
+
+		} catch (ResourceNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		return null;
 	}

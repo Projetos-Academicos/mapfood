@@ -6,6 +6,7 @@ public class ConstantesStatus {
 	public static final String ACEITO = "ACEITO";
 	public static final String RECUSADO = "RECUSADO";
 	public static final String EM_ANDAMENTO = "EM_ANDAMENTO";
+	public static final String PEDIDO_SAIU_PARA_ENTREGA = "PEDIDO_SAIU_PARA_ENTREGA";
 	public static final String CANCELADO = "CANCELADO";
 	public static final String FINALIZADO = "FINALIZADO";
 }

@@ -1,6 +1,10 @@
 package com.codenation.desafiofinal.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,27 +43,39 @@ public class RotaService {
 	@Autowired
 	private GoogleMapService googleMapService;
 
-	public Map<String, Localizacao> buscarInformacoes(EntregaPedido entrega) throws ResourceNotFoundException{
+	public Map<String, Localizacao> buscarInformacoes(EntregaPedido entrega, boolean isRotaMotoboyEstabelecimento) throws ResourceNotFoundException{
 
-		if(entrega.getStatusEntrega().equals(ConstantesStatus.AGUARDANDO_RESPOSTA)) {
-			Map<String, Localizacao> mapEntidadeLocalizacao = new HashMap<String, Localizacao>();
+		if(entrega.getStatusEntrega().equals(ConstantesStatus.AGUARDANDO_RESPOSTA) && isRotaMotoboyEstabelecimento) {
 
-			Estabelecimento estabelecimento = estabelecimentoRepository.findById(entrega.getEstabelecimento().getId()).orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado ::" + entrega.getEstabelecimento().getId()));
-			Motoboy motoboy = motoboyRepository.findById(entrega.getMotoboy().getId()).orElseThrow(() -> new ResourceNotFoundException("Motoboy não encontrado ::" + entrega.getMotoboy().getId()));
+			Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
+			return mapEntidadeLocalizacao;
 
-			mapEntidadeLocalizacao.put("motoboy", motoboy.getLocalizacao());
-			mapEntidadeLocalizacao.put("estabelecimento", estabelecimento.getLocalizacao());
+		} else if(entrega.getStatusEntrega().equals(ConstantesStatus.EM_ANDAMENTO) && !isRotaMotoboyEstabelecimento) {
 
+			Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
 			return mapEntidadeLocalizacao;
 		}
 
+
 		return null;
+	}
+
+	public Map<String, Localizacao> buscarLocalizacaoMotoboyEEstabelecimento(EntregaPedido entrega) throws ResourceNotFoundException {
+		Map<String, Localizacao> mapEntidadeLocalizacao = new HashMap<String, Localizacao>();
+
+		Estabelecimento estabelecimento = estabelecimentoRepository.findById(entrega.getEstabelecimento().getId()).orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado ::" + entrega.getEstabelecimento().getId()));
+		Motoboy motoboy = motoboyRepository.findById(entrega.getMotoboy().getId()).orElseThrow(() -> new ResourceNotFoundException("Motoboy não encontrado ::" + entrega.getMotoboy().getId()));
+
+		mapEntidadeLocalizacao.put("motoboy", motoboy.getLocalizacao());
+		mapEntidadeLocalizacao.put("estabelecimento", estabelecimento.getLocalizacao());
+
+		return mapEntidadeLocalizacao;
 	}
 
 	public Rota definirRotaMotoboyEstabelecimento(Long idEntrega) throws ResourceNotFoundException, RotaException {
 		EntregaPedido entrega = entregaRepository.findById(idEntrega).orElseThrow(() -> new ResourceNotFoundException("Entrega não encontrado ::" + idEntrega));
 
-		Map<String, Localizacao> mapEntidadeLocalizacao = buscarInformacoes(entrega);
+		Map<String, Localizacao> mapEntidadeLocalizacao = buscarInformacoes(entrega, true);
 
 		if(!CollectionUtils.isEmpty(mapEntidadeLocalizacao) && mapEntidadeLocalizacao.size() == 2) {
 			entrega.setStatusEntrega(ConstantesStatus.EM_ANDAMENTO);
@@ -82,7 +98,39 @@ public class RotaService {
 		}
 	}
 
-	public void definirRotaParaEntregarPedidosAosClientes(Long idEntrega) {
+	public List<Rota> definirRotaParaEntregarPedidosAosClientes(Long idEntrega) throws ResourceNotFoundException {
+		EntregaPedido entrega = entregaRepository.findById(idEntrega).orElseThrow(() -> new ResourceNotFoundException("Entrega não encontrado ::" + idEntrega));
+
+		Map<String, Localizacao> mapEntidadeLocalizacao = buscarInformacoes(entrega, false);
+
+		if(!CollectionUtils.isEmpty(mapEntidadeLocalizacao) && mapEntidadeLocalizacao.size() == 2) {
+			entrega.setStatusEntrega(ConstantesStatus.PEDIDO_SAIU_PARA_ENTREGA);
+
+			if(entrega.getListaPedidos().size() > 1) {
+				Collections.sort(entrega.getListaPedidos());
+
+				List<Pedido> listaPedidos = entrega.getListaPedidos();
+				List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
+
+				Integer ultimoIndice = listaPedidos.size() - 1;
+				Pedido ultimoPedido = listaPedidos.get(ultimoIndice);
+				listaPedidos.remove(ultimoPedido);
+				Localizacao destino = ultimoPedido.getCliente().getLocalizacao();
+
+				for (Pedido pedido : listaPedidos) {
+					Localizacao localizacao = pedido.getCliente().getLocalizacao();
+					listaLocalizacao.add(localizacao);
+				}
+
+				return googleMapService.buscarRotas(mapEntidadeLocalizacao.get("estabelecimento"), destino, listaLocalizacao);
+			}else {
+				Pedido pedido = entrega.getListaPedidos().get(0);
+
+				return new ArrayList<Rota>(Arrays.asList(googleMapService.buscarUnicaRota(mapEntidadeLocalizacao.get("estabelecimento"), pedido.getCliente().getLocalizacao())));
+			}
+		}
+
+		return null;
 
 	}
 

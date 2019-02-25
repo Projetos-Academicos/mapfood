@@ -9,11 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.codenation.desafiofinal.constante.ConstantesStatus;
+import com.codenation.desafiofinal.dto.PedidoDTO;
 import com.codenation.desafiofinal.exception.PedidoException;
 import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.model.Cliente;
 import com.codenation.desafiofinal.model.EntregaPedido;
 import com.codenation.desafiofinal.model.Estabelecimento;
+import com.codenation.desafiofinal.model.ItemPedido;
 import com.codenation.desafiofinal.model.Localizacao;
 import com.codenation.desafiofinal.model.Motoboy;
 import com.codenation.desafiofinal.model.Pedido;
@@ -109,7 +111,19 @@ public class PedidoService {
 
 		return repository.save(pedidoCompleto);
 	}
-	private Double calcularDistanciaEntreDoisPontos(Localizacao localizacao1, Localizacao localizacao2) {
+
+	public PedidoDTO cadastrarPedidoCliente(Pedido pedido) throws ResourceNotFoundException, PedidoException {
+		Pedido pedidoSalvo = cadastrarPedido(pedido);
+		List<Long> listaIdProduto = new ArrayList<Long>();
+		for (ItemPedido item : pedido.getListaItemPedido()) {
+			listaIdProduto.add(item.getProduto().getId());
+		}
+		PedidoDTO pedidoResponse = new PedidoDTO(pedidoSalvo.getId(), pedidoSalvo.getCliente().getId(),listaIdProduto,
+				pedidoSalvo.getEstabelecimento().getNome(), pedidoSalvo.getDataRealizacaoPedido(), pedidoSalvo.getEntrega().getId(), pedidoSalvo.getStatus());
+		return pedidoResponse;
+	}
+
+	public Double calcularDistanciaEntreDoisPontos(Localizacao localizacao1, Localizacao localizacao2) {
 
 		Double latitude1 = Double.parseDouble(localizacao1.getLatitude());
 		Double longitude1 = Double.parseDouble(localizacao1.getLongitude());
@@ -202,7 +216,7 @@ public class PedidoService {
 		return repository.findAll();
 	}
 
-	private List<Localizacao> obterLocalizacaoDosMotoboys(List<Motoboy> listaMotoboys) {
+	public List<Localizacao> obterLocalizacaoDosMotoboys(List<Motoboy> listaMotoboys) {
 
 		List<Localizacao> listaLocalizacao = new ArrayList<Localizacao>();
 		listaMotoboys.forEach(motoboy -> {
