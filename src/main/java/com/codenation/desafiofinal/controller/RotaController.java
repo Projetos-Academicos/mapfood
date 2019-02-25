@@ -1,5 +1,7 @@
 package com.codenation.desafiofinal.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,14 @@ public class RotaController {
 		} catch (ResourceNotFoundException | RotaException e) {
 			e.printStackTrace();
 		}
+
+		return null;
+	}
+
+	@GetMapping("/motoboy-entrega-pedidos/{idEntrega}")
+	public List<Rota> buscarRotasMotoboyClientesPorOrdemHorarioPedido(@PathVariable Long idEntrega){
+
+		service.definirRotaParaEntregarPedidosAosClientes(idEntrega);
 
 		return null;
 	}
