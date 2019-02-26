@@ -12,7 +12,7 @@ ALTER SEQUENCE seq_produto RESTART WITH 1000;
 
 --ALTERAÇÕES PARA TESTES REAIS COM LOCALIZAÇÕES EM RECIFE
 
-update estabelecimento set nome = 'Passira', latitude = '-7.9453', longitude = '-35.5856', cidade_id = 3 where id = 20
+update estabelecimento set nome = 'Feijoada da Ceça', latitude = '-8.0338554', longitude = '-34.8854297', cidade_id = 3 where id = 20
 
 update produto set cidade_id = 3, estabelecimento_id = 20 where id = 25;
 update produto set cidade_id = 3, estabelecimento_id = 20 where id = 5;

@@ -82,9 +82,9 @@ public class PedidoService {
 			}
 		}
 
-		//		if(menorDistancia > 20d) { //TODO VALIDAÇÃO DE DISTANCIA MAXIMA ENTRE MOTOBOY E ESTABELECIMENTO, RETIRAR SOMENTE NO AMBIENTE DE TESTE
-		//			return null;
-		//		}
+		if(menorDistancia > 20d) { //TODO VALIDAÇÃO DE DISTANCIA MAXIMA ENTRE MOTOBOY E ESTABELECIMENTO, RETIRAR SOMENTE NO AMBIENTE DE TESTE
+			return null;
+		}
 
 		return motoboyRepository.findByLocalizacaoLatitudeAndLocalizacaoLongitude(menorLatitude.toString(), menorLongitude.toString());
 	}
