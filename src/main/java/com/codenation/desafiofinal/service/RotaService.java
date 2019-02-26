@@ -16,6 +16,7 @@ import com.codenation.desafiofinal.exception.ResourceNotFoundException;
 import com.codenation.desafiofinal.exception.RotaException;
 import com.codenation.desafiofinal.model.EntregaPedido;
 import com.codenation.desafiofinal.model.Estabelecimento;
+import com.codenation.desafiofinal.model.JornadaRota;
 import com.codenation.desafiofinal.model.Localizacao;
 import com.codenation.desafiofinal.model.Motoboy;
 import com.codenation.desafiofinal.model.Pedido;
@@ -46,19 +47,19 @@ public class RotaService {
 
 	public Map<String, Localizacao> buscarInformacoes(EntregaPedido entrega, boolean isRotaMotoboyEstabelecimento) throws ResourceNotFoundException{
 
-		if(entrega.getStatusEntrega().equals(ConstantesStatus.AGUARDANDO_RESPOSTA) && isRotaMotoboyEstabelecimento) {
+		//		if(entrega.getStatusEntrega().equals(ConstantesStatus.AGUARDANDO_RESPOSTA) && isRotaMotoboyEstabelecimento) {
 
-			Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
-			return mapEntidadeLocalizacao;
+		Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
+		return mapEntidadeLocalizacao;
 
-		} else if(entrega.getStatusEntrega().equals(ConstantesStatus.EM_ANDAMENTO) && !isRotaMotoboyEstabelecimento) {
+		//		} else if(entrega.getStatusEntrega().equals(ConstantesStatus.EM_ANDAMENTO) && !isRotaMotoboyEstabelecimento) {
 
-			Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
-			return mapEntidadeLocalizacao;
-		}
+		//			Map<String, Localizacao> mapEntidadeLocalizacao = buscarLocalizacaoMotoboyEEstabelecimento(entrega);
+		//			return mapEntidadeLocalizacao;
+		//		}
 
 
-		return null;
+		//		return null;
 	}
 
 	public Map<String, Localizacao> buscarLocalizacaoMotoboyEEstabelecimento(EntregaPedido entrega) throws ResourceNotFoundException {
@@ -99,9 +100,15 @@ public class RotaService {
 				entrega.setDistanciaPercorrida(0d);
 			}
 
-			rota.getListaJornada().forEach(jornada -> {
+			Long tempoChegadaAoEstabelecimento = 0l;
+			for (JornadaRota jornada : rota.getListaJornada()) {
 				entrega.setDistanciaPercorrida(entrega.getDistanciaPercorrida() + jornada.getDistancia());
-			});
+				tempoChegadaAoEstabelecimento = tempoChegadaAoEstabelecimento + jornada.getDuracao();
+			}
+
+			if(MapFoodUtil.converterSegundosEmMinutos(tempoChegadaAoEstabelecimento) < 10d) {
+				entrega.setDistanciaPercorrida(10d);
+			}
 
 			entregaRepository.save(entrega);
 

@@ -25,6 +25,11 @@ public class MapFoodUtil {
 		Double quilometros = (double) (metros / 1000);
 		return quilometros;
 	}
+	
+	public static Double converterSegundosEmMinutos(Long segundos) {
+		Double minutos = (double) (segundos / 60);
+		return minutos;
+	}
 
 	private static Double deg2rad(Double deg) {
 		return (deg * Math.PI / 180.0);
