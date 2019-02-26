@@ -183,7 +183,7 @@ public class PedidoService {
 
 	public Pedido determinarSeOPedidoEntraEmUmaEntregaExistente(Pedido pedidoCompleto) {
 
-		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), ConstantesStatus.EM_ANDAMENTO);
+		List<EntregaPedido> listaEntregasMesmoEstabelecimento = entregaRepository.findByEstabelecimentoIdAndStatusEntrega(pedidoCompleto.getEstabelecimento().getId(), ConstantesStatus.AGUARDANDO_RESPOSTA);
 
 		for (EntregaPedido entrega : listaEntregasMesmoEstabelecimento) {
 			if(!CollectionUtils.isEmpty(entrega.getListaPedidos()) && entrega.getListaPedidos().size() < 5) {
@@ -212,6 +212,40 @@ public class PedidoService {
 
 		return pedidoCompleto;
 	}
+	public void finalizarEntrega(Long idEntrega) throws ResourceNotFoundException {
+		EntregaPedido entrega = entregaRepository.findById(idEntrega).orElseThrow(() -> new ResourceNotFoundException("Entrega não encontrada ::" + idEntrega));
+
+		entrega.setDataFinalizandoEntrega(MapFoodUtil.getDataAtual());
+		entrega.setStatusEntrega(ConstantesStatus.FINALIZADO);
+
+		entregaRepository.save(entrega);
+	}
+
+	public void informarEntregaPedido(Long id) throws ResourceNotFoundException {
+		Pedido pedido = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado ::" + id));
+
+		pedido.setDataFinalizacaoPedido(MapFoodUtil.getDataAtual());
+
+		boolean isFinalizarPedido = isUltimoPedidoDaEntrega(pedido.getEntrega().getId());
+
+		if(isFinalizarPedido) {
+			finalizarEntrega(pedido.getEntrega().getId());
+		}
+
+		pedido.setStatus(ConstantesStatus.FINALIZADO);
+		repository.save(pedido);
+	}
+
+	public boolean isUltimoPedidoDaEntrega(Long idEntrega) {
+		Long count = repository.countByEntregaIdAndStatusNot(idEntrega, ConstantesStatus.FINALIZADO);
+
+		if(count > 1) {
+			return false;
+		}
+
+		return true;
+	}
+
 	public List<Pedido> listarTodos(){
 		return repository.findAll();
 	}

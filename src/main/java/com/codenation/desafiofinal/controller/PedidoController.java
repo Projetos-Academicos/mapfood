@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,17 @@ public class PedidoController {
 		}
 
 		return null;
+	}
+
+	@PostMapping("/finalizar-pedido/{id}")
+	public void finalizarEntregaPedido(@PathVariable Long id) {
+		try {
+
+			service.informarEntregaPedido(id);
+
+		} catch (ResourceNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@GetMapping

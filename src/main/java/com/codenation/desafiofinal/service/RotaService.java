@@ -24,6 +24,7 @@ import com.codenation.desafiofinal.repository.EntregaPedidoRepository;
 import com.codenation.desafiofinal.repository.EstabelecimentoRepository;
 import com.codenation.desafiofinal.repository.MotoboyRepository;
 import com.codenation.desafiofinal.repository.PedidoRepository;
+import com.codenation.desafiofinal.util.MapFoodUtil;
 
 @Service
 public class RotaService {
@@ -79,6 +80,7 @@ public class RotaService {
 
 		if(!CollectionUtils.isEmpty(mapEntidadeLocalizacao) && mapEntidadeLocalizacao.size() == 2) {
 			entrega.setStatusEntrega(ConstantesStatus.EM_ANDAMENTO);
+			entrega.setDataIniciandoEntrega(MapFoodUtil.getDataAtual());
 			entrega.getListaPedidos().forEach(pedido -> {
 				try {
 
@@ -91,8 +93,19 @@ public class RotaService {
 				}
 			});
 
+			Rota rota = googleMapService.buscarUnicaRota(mapEntidadeLocalizacao.get("motoboy"), mapEntidadeLocalizacao.get("estabelecimento"));
+
+			if(entrega.getDistanciaPercorrida() == null) {
+				entrega.setDistanciaPercorrida(0d);
+			}
+
+			rota.getListaJornada().forEach(jornada -> {
+				entrega.setDistanciaPercorrida(entrega.getDistanciaPercorrida() + jornada.getDistancia());
+			});
+
 			entregaRepository.save(entrega);
-			return googleMapService.buscarUnicaRota(mapEntidadeLocalizacao.get("motoboy"), mapEntidadeLocalizacao.get("estabelecimento"));
+
+			return rota;
 		}else {
 			throw new RotaException("Infelizmente não foi possível traçar uma rota para o estabelecimento, se o problema persistir contate o suporte!");
 		}
@@ -122,11 +135,29 @@ public class RotaService {
 					listaLocalizacao.add(localizacao);
 				}
 
-				return googleMapService.buscarRotas(mapEntidadeLocalizacao.get("estabelecimento"), destino, listaLocalizacao);
-			}else {
-				Pedido pedido = entrega.getListaPedidos().get(0);
+				List<Rota> listaRotas = googleMapService.buscarRotas(mapEntidadeLocalizacao.get("estabelecimento"), destino, listaLocalizacao);
 
-				return new ArrayList<Rota>(Arrays.asList(googleMapService.buscarUnicaRota(mapEntidadeLocalizacao.get("estabelecimento"), pedido.getCliente().getLocalizacao())));
+				listaRotas.forEach(rota -> {
+					rota.getListaJornada().forEach(jornada -> {
+						entrega.setDistanciaPercorrida(entrega.getDistanciaPercorrida() + jornada.getDistancia());
+					});
+				});
+
+				entregaRepository.save(entrega);
+
+				return listaRotas;
+			}else {
+
+				Pedido pedido = entrega.getListaPedidos().get(0);
+				Rota rota = googleMapService.buscarUnicaRota(mapEntidadeLocalizacao.get("estabelecimento"), pedido.getCliente().getLocalizacao());
+
+				rota.getListaJornada().forEach(jornada -> {
+					entrega.setDistanciaPercorrida(entrega.getDistanciaPercorrida() + jornada.getDistancia());
+				});
+
+				entregaRepository.save(entrega);
+
+				return new ArrayList<Rota>(Arrays.asList(rota));
 			}
 		}
 

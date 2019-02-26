@@ -21,6 +21,11 @@ public class MapFoodUtil {
 		return dist;
 	}
 
+	public static Double converterMetrosEmQuilometros(Double metros) {
+		Double quilometros = (double) (metros / 1000);
+		return quilometros;
+	}
+
 	private static Double deg2rad(Double deg) {
 		return (deg * Math.PI / 180.0);
 	}

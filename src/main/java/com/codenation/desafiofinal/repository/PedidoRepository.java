@@ -6,6 +6,5 @@ import com.codenation.desafiofinal.model.Pedido;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-	Long countByEntregaId(Long idEntrega);
-
+	Long countByEntregaIdAndStatusNot(Long idEntrega, String status);
 }

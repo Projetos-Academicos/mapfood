@@ -1,9 +1,9 @@
 package com.codenation.desafiofinal.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,7 +15,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.NumberFormat;
 
 @Entity
 @Table(name = "entrega")
@@ -47,8 +52,19 @@ public class EntregaPedido {
 	@Column(name = "status")
 	private String statusEntrega;
 
-	@Embedded
-	private DadosRota dadosRota;
+	@NumberFormat(pattern = "###.##")
+	@Column(name = "distancia_percorrida")
+	private Double distanciaPercorrida;
+
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "data_inicio_entrega")
+	private Date dataIniciandoEntrega;
+
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "data_final_entrega")
+	private Date dataFinalizandoEntrega;
 
 	public EntregaPedido() {
 
@@ -60,8 +76,14 @@ public class EntregaPedido {
 		setMotoboy(motoboy);
 	}
 
-	public DadosRota getDadosRota() {
-		return dadosRota;
+	public Date getDataFinalizandoEntrega() {
+		return dataFinalizandoEntrega;
+	}
+	public Date getDataIniciandoEntrega() {
+		return dataIniciandoEntrega;
+	}
+	public Double getDistanciaPercorrida() {
+		return distanciaPercorrida;
 	}
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
@@ -78,15 +100,27 @@ public class EntregaPedido {
 	public Motoboy getMotoboy() {
 		return motoboy;
 	}
+
 	public String getStatusEntrega() {
 		return statusEntrega;
 	}
-	public void setDadosRota(DadosRota dadosRota) {
-		this.dadosRota = dadosRota;
+
+	public void setDataFinalizandoEntrega(Date dataFinalizandoEntrega) {
+		this.dataFinalizandoEntrega = dataFinalizandoEntrega;
 	}
+
+	public void setDataIniciandoEntrega(Date dataIniciandoEntrega) {
+		this.dataIniciandoEntrega = dataIniciandoEntrega;
+	}
+
+	public void setDistanciaPercorrida(Double distanciaPercorrida) {
+		this.distanciaPercorrida = distanciaPercorrida;
+	}
+
 	public void setEstabelecimento(Estabelecimento estabelecimento) {
 		this.estabelecimento = estabelecimento;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}

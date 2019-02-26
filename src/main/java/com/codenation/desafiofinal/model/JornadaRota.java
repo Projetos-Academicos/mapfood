@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.maps.model.DirectionsLeg;
 
 public class JornadaRota {
 
 	private Long distancia;
 	private Long duracao;
+
+	@JsonProperty("siga_as_instrucoes")
 	private List<InstrucaoRota> passosASeguir;
 
 	public JornadaRota(DirectionsLeg leg) {
